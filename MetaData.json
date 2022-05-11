@@ -1,0 +1,5 @@
+{
+  "Name": "CohortDiagnosticsModule",
+  "Version": "0.0.1",
+  "Dependencies": ["CohortGenerator"]
+}
