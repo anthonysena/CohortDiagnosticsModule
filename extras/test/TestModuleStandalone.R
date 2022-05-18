@@ -20,11 +20,11 @@ jobContext$moduleExecutionSettings$connectionDetails <- connectionDetails
 # Force the recreation of the subfolders
 
 if (dir.exists(jobContext$moduleExecutionSettings$workSubFolder)) {
-  unlink(jobContext$moduleExecutionSettings$workSubFolder)
+  unlink(jobContext$moduleExecutionSettings$workSubFolder, recursive = TRUE)
 }
 dir.create(jobContext$moduleExecutionSettings$workSubFolder, recursive = TRUE)
 if (dir.exists(jobContext$moduleExecutionSettings$resultsSubFolder)) {
-  unlink(jobContext$moduleExecutionSettings$resultsSubFolder)
+  unlink(jobContext$moduleExecutionSettings$resultsSubFolder, recursive = TRUE)
 }
 dir.create(jobContext$moduleExecutionSettings$resultsSubFolder, recursive = TRUE)
 

@@ -31,9 +31,10 @@ execute <- function(jobContext) {
   cohortDefinitionSet <- createCohortDefinitionSetFromJobContext(sharedResources = jobContext$sharedResources)
 
   message("Executing cohort diagnostics")
+  exportFolder <- jobContext$moduleExecutionSettings$resultsSubFolder
   args <- jobContext$settings
   args$cohortDefinitionSet <- cohortDefinitionSet
-  args$exportFolder <- jobContext$moduleExecutionSettings$resultsSubFolder
+  args$exportFolder <- exportFolder
   args$databaseId <- jobContext$moduleExecutionSettings$databaseId
   args$connectionDetails <- jobContext$moduleExecutionSettings$connectionDetails
   args$cdmDatabaseSchema <- jobContext$moduleExecutionSettings$cdmDatabaseSchema
@@ -43,17 +44,19 @@ execute <- function(jobContext) {
   args$minCellCount <- jobContext$moduleExecutionSettings$minCellCount
   do.call(CohortDiagnostics::executeDiagnostics, args)
   
+  unlink(file.path(exportFolder, sprintf("Results_%s.zip", jobContext$moduleExecutionSettings$databaseId)))
+  unlink(file.path(exportFolder, "database.csv"))
+  unlink(file.path(exportFolder, "cohort.csv"))
+  
+  moduleInfo <- ParallelLogger::loadSettingsFromJson("MetaData.json")
   resultsDataModel <- readr::read_csv(file = system.file("settings", "resultsDataModelSpecification.csv", package = "CohortDiagnostics"),
                                       show_col_types = FALSE)
-  readr::write_csv(resultsDataModel, file.path(jobContext$moduleExecutionSettings$resultsSubFolder, "resultsDataModelSpecification.csv"))
-  
-  message("Cleaning up")
-  unlink(file.path(jobContext$moduleExecutionSettings$resultsSubFolder, 
-                   sprintf("Results_%s.zip", jobContext$moduleExecutionSettings$databaseId)))
-  unlink(file.path(jobContext$moduleExecutionSettings$resultsSubFolder, 
-                   "database.csv"))
-  unlink(file.path(jobContext$moduleExecutionSettings$resultsSubFolder, 
-                   "cohort.csv"))
+  resultsDataModel <- resultsDataModel[file.exists(file.path(exportFolder, paste0(resultsDataModel$tableName, ".csv"))), ]
+  newTableNames <- paste0(moduleInfo$TablePrefix, resultsDataModel$tableName)
+  file.rename(file.path(exportFolder, paste0(unique(resultsDataModel$tableName), ".csv")),
+              file.path(exportFolder, paste0(unique(newTableNames), ".csv")))
+  resultsDataModel$tableName <- newTableNames
+  readr::write_csv(resultsDataModel, file.path(exportFolder, "resultsDataModelSpecification.csv"))
 }
 
 # Private methods -------------------------
