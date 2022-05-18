@@ -15,9 +15,7 @@
 # limitations under the License.
 
 # Module methods -------------------------
-validate <- function(jobContext) {
-  # Verify the job context details - this feels like a task to centralize for
-  # all modules
+execute <- function(jobContext) {
   checkmate::assert_list(x = jobContext)
   if (is.null(jobContext$settings)) {
     stop("Analysis settings not found in job context")
@@ -29,16 +27,6 @@ validate <- function(jobContext) {
     stop("Execution settings not found in job context")
   }
   
-  # Validate that the analysis specification will work when we 
-  # enter the execute statement. Bad thing here: we're doing
-  # double work to construct the cohort definition set but I'm
-  # unsure if validate() should potentially change the jobContext
-  # to add any necessary elements to the executionSettings list?
-  cohortDefinitionSet <- createCohortDefinitionSetFromJobContext(sharedResources = jobContext$sharedResources)
-  invisible(cohortDefinitionSet)
-}
-
-execute <- function(jobContext) {
   message("Generating cohort definition set")
   cohortDefinitionSet <- createCohortDefinitionSetFromJobContext(sharedResources = jobContext$sharedResources)
 
@@ -54,6 +42,18 @@ execute <- function(jobContext) {
   args$incrementalFolder <- jobContext$moduleExecutionSettings$workSubFolder
   args$minCellCount <- jobContext$moduleExecutionSettings$minCellCount
   do.call(CohortDiagnostics::executeDiagnostics, args)
+  
+  resultsDataModel <- readr::read_csv(file = system.file("settings", "resultsDataModelSpecification.csv", package = "CohortDiagnostics"),
+                                      show_col_types = FALSE)
+  readr::write_csv(resultsDataModel, file.path(jobContext$moduleExecutionSettings$resultsSubFolder, "resultsDataModelSpecification.csv"))
+  
+  message("Cleaning up")
+  unlink(file.path(jobContext$moduleExecutionSettings$resultsSubFolder, 
+                   sprintf("Results_%s.zip", jobContext$moduleExecutionSettings$databaseId)))
+  unlink(file.path(jobContext$moduleExecutionSettings$resultsSubFolder, 
+                   "database.csv"))
+  unlink(file.path(jobContext$moduleExecutionSettings$resultsSubFolder, 
+                   "cohort.csv"))
 }
 
 # Private methods -------------------------
@@ -79,7 +79,7 @@ createCohortDefinitionSetFromJobContext <- function(sharedResources) {
     cohortDefinitionSet <- rbind(cohortDefinitionSet, data.frame(cohortId = as.integer(cohortDefinitions[[i]]$cohortId),
                                                                  cohortName = cohortDefinitions[[i]]$cohortName, 
                                                                  sql = cohortSql,
-                                                                 cohortJson = cohortJson,
+                                                                 json = cohortJson,
                                                                  stringsAsFactors = FALSE))    
   }
   return(cohortDefinitionSet)

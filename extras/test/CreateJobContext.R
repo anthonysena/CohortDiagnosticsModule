@@ -1,5 +1,8 @@
+# Create a job context for testing purposes
+
 library(Strategus)
 library(dplyr)
+source("extras/CreateModuleSpecifications.R")
 
 # Generic Helpers ----------------------------
 getModuleInfo <- function() {
@@ -24,19 +27,6 @@ getSampleCohortDefintionSet <- function() {
   return(sampleCohorts)
 }
 
-# Module Spec Builders ----------------------------
-# Analysis Spec ----------------------------
-createCohortGeneratorModuleSpecifications <- function(incremental = TRUE,
-                                                      generateStats = TRUE) {
-  moduleInfo <- getModuleInfo()
-  specifications <- list(module = moduleInfo$Name,
-                         version = moduleInfo$Version,
-                         settings = list(incremental = incremental,
-                                         generateStats = generateStats))
-  class(specifications) <- c("CohortGeneratorModuleSpecifications", "ModuleSpecifications")
-  return(specifications)
-}
-
 createCohortSharedResource <- function(cohortDefinitionSet) {
   # Fill the cohort set using  cohorts included in this
   # package as an example
@@ -47,9 +37,9 @@ createCohortSharedResource <- function(cohortDefinitionSet) {
 
 analysisSpecifications <- createEmptyAnalysisSpecificiations() %>%
   addSharedResources(createCohortSharedResource(getSampleCohortDefintionSet())) %>%
-  addModuleSpecifications(createCohortGeneratorModuleSpecifications())
+  addModuleSpecifications(createCohortDiagnosticsModuleSpecifications())
 
-ParallelLogger::saveSettingsToJson(analysisSpecifications, "extras/testAnalysisSpecifications.json")
+ParallelLogger::saveSettingsToJson(analysisSpecifications, "extras/test/testAnalysisSpecifications.json")
 
 # Module Settings Spec ----------------------------
 # Note: Need to do only once: store connection details in keyring:
@@ -67,16 +57,17 @@ executionSettings <- Strategus::createExecutionSettings(connectionDetailsReferen
                                                         resultsFolder = file.path(getwd(), "extras/output/results"),
                                                         minCellCount = 5)
 
-ParallelLogger::saveSettingsToJson(executionSettings, "extras/testExecutionSettings.json")
+ParallelLogger::saveSettingsToJson(executionSettings, "extras/test/testExecutionSettings.json")
 
 # Job Context ----------------------------
-module <- "CohortGeneratorModule"
+module <- "CohortDiagnosticsModule"
 moduleIndex <- 1
 moduleExecutionSettings <- executionSettings
 moduleExecutionSettings$workSubFolder <- file.path(executionSettings$workFolder, sprintf("%s_%d", module, moduleIndex))
 moduleExecutionSettings$resultsSubFolder <- file.path(executionSettings$resultsFolder, sprintf("%s_%d", module, moduleIndex))
+moduleExecutionSettings$databaseId <- 123
 jobContext <- list(sharedResources = analysisSpecifications$sharedResources,
                    settings = analysisSpecifications$moduleSpecifications[[moduleIndex]]$settings,
                    moduleExecutionSettings = moduleExecutionSettings)
-saveRDS(jobContext, "extras/jobContext.rds")
+saveRDS(jobContext, "extras/test/jobContext.rds")
 
