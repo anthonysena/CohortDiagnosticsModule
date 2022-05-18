@@ -53,7 +53,7 @@ rCode[grep("return\\(analysis\\)", rCode)]  <- sprintf("
                          settings = analysis)
   class(specifications) <- c(\"CohortDiagnosticsModuleSpecifications\", \"ModuleSpecifications\")
   return(specifications)", moduleInfo$Name, moduleInfo$Version)
-writeLines(rCode, "extras/CreateModuleSpecifications.R")
+writeLines(rCode, "SettingsFunctions.R")
 
 
 # Generate renv lock file and activate renv:
