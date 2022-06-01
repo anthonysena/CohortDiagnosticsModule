@@ -47,10 +47,11 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           
-      # install renv package
-      - run: R -e 'install.packages("renv")'
+      - name: Install renv package
+        run: |
+          install.packages("renv")
+        shell: Rscript {0}
 
-      # set up cache
       - name: Cache packages
         if: runner.os != 'Windows'
         uses: actions/cache@v2
@@ -60,23 +61,10 @@ jobs:
            restore-keys: |-
               ${{ runner.os }}-renv-        
 
-      # Restore renv
-      - run: R -e 'renv::restore()'
-      
-      # execute Rscript
-      - run: Rscript tests/testScript.R
-
-      - name: Query dependencies
+      - name: Renv restore
         run: |
-          install.packages('remotes')
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+          renv::restore()
         shell: Rscript {0}
 
-      - name: Cache R packages
-        if: runner.os != 'Windows'
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+      - name: Run test packages
+        run: Rscript tests/testScript.R
