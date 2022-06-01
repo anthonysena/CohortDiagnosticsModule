@@ -19,8 +19,6 @@ jobs:
       matrix:
         config:
           - {os: windows-latest, r: 'release'}  # Does not appear to have Java 32-bit, hence the --no-multiarch
-          - {os: macOS-latest, r: 'release'}
-          - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
 
     env:
       GITHUB_PAT: ${{ secrets.GH_TOKEN }}
@@ -50,19 +48,10 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           
-      - name: Install renv package
-        run: |
-          install.packages("renv")
-        shell: Rscript {0}
-        
-      - name: Cache renv cache
-        uses: actions/cache@v2
+      - uses: r-lib/actions/setup-renv@v2
         with:
-           path: ${{ env.RENV_PATHS_ROOT }}
-           key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-           restore-keys: |-
-              ${{ runner.os }}-renv-    
-              
+          cache-version: 2
+          
       - name: Install system requirements
         if: runner.os == 'Linux'
         run: |
@@ -70,11 +59,6 @@ jobs:
           sudo apt-get install -y default-jdk
           sudo apt-get install -y libcurl4-openssl-dev
           sudo apt-get install -y libssl-dev
-  
-      - name: Renv restore
-        run: |
-          renv::restore()
-        shell: Rscript {0}
 
       - name: Install testthat package
         run: |
