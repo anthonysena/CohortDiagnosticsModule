@@ -21,7 +21,7 @@ test_that("Run module", {
   source("Main.R")
   execute(jobContext)
   resultsFiles <- list.files(resultsfolder)
-  expect_true("cd_incidence_rate.csv" %in% resultsFiles)
+  expect_true("foo.bar" %in% resultsFiles)
 })
 
 unlink(workFolder)
