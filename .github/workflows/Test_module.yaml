@@ -53,7 +53,7 @@ jobs:
           install.packages("renv")
         shell: Rscript {0}
         
-      - name: Cache packages
+      - name: Cache renv cache
         uses: actions/cache@v2
         with:
            path: ${{ env.RENV_PATHS_ROOT }}
@@ -64,7 +64,7 @@ jobs:
       - name: Install system dependencies
         if: runner.os == 'Linux'
         run: |
-          Rscript 'install.packages("remotes")'
+          Rscript -e 'install.packages("remotes")'
           while read -r cmd
           do
             eval sudo $cmd
