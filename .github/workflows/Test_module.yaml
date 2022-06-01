@@ -68,7 +68,7 @@ jobs:
           while read -r cmd
           do
             eval sudo $cmd
-          done < <(Rscript -e 'writeLines(remotes::system_requirements(os = "ubuntu", os_release = "20.04", package = "rJava")')
+          done < <(Rscript -e 'writeLines(remotes::system_requirements(os = "ubuntu", os_release = "20.04", package = "rJava"))')
 
       - name: Renv restore
         run: |
