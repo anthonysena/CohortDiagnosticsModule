@@ -1,4 +1,7 @@
 library(testthat)
+
+source("tests/installRequirements.R")
+
 testFiles <- list.files(file.path("tests"), "test-.*\\.R", full.names = TRUE)
 for (testFile in testFiles) {
   message(sprintf("*** Running tests in '%s' ***", testFile))

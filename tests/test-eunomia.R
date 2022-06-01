@@ -1,10 +1,5 @@
 library(testthat)
-if (!require("remotes", quietly = T))
-  install.packages("remotes")
-if (!require("Eunomia", quietly = T))
-  remotes::install_github("ohdsi/Eunomia")
 library(Eunomia)
-
 connectionDetails <- getEunomiaConnectionDetails()
 Eunomia::createCohorts(connectionDetails)
 
@@ -21,7 +16,7 @@ test_that("Run module", {
   source("Main.R")
   execute(jobContext)
   resultsFiles <- list.files(resultsfolder)
-  expect_true("foo.bar" %in% resultsFiles)
+  expect_true("cd_incidence_rate.csv" %in% resultsFiles)
 })
 
 unlink(workFolder)
