@@ -58,7 +58,7 @@ writeLines(rCode, "SettingsFunctions.R")
 
 # Generate renv lock file and activate renv:
 OhdsiRTools::createRenvLockFile(rootPackage = "CohortDiagnostics",
-                                includeRootPackage = FALSE,
+                                includeRootPackage = TRUE,
                                 mode = "description",
                                 additionalRequiredPackages = c("checkmate", "CirceR", "CohortGenerator"))
 renv::init()
