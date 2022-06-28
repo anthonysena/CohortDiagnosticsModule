@@ -45,8 +45,6 @@ execute <- function(jobContext) {
   do.call(CohortDiagnostics::executeDiagnostics, args)
   
   unlink(file.path(exportFolder, sprintf("Results_%s.zip", jobContext$moduleExecutionSettings$databaseId)))
-  unlink(file.path(exportFolder, "database.csv"))
-  unlink(file.path(exportFolder, "cohort.csv"))
   
   moduleInfo <- ParallelLogger::loadSettingsFromJson("MetaData.json")
   resultsDataModel <- readr::read_csv(file = system.file("settings", "resultsDataModelSpecification.csv", package = "CohortDiagnostics"),
