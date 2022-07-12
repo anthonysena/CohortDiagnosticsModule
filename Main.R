@@ -49,12 +49,6 @@ execute <- function(jobContext) {
   moduleInfo <- ParallelLogger::loadSettingsFromJson("MetaData.json")
   resultsDataModel <- readr::read_csv(file = system.file("settings", "resultsDataModelSpecification.csv", package = "CohortDiagnostics"),
                                       show_col_types = FALSE)
-  # AS: Revising some of the column names to match the 
-  # names required by OhdsiSharing. This can be removed once we have
-  # modified this info in CohortDiagnostics
-  names(resultsDataModel)[names(resultsDataModel) == 'fieldName'] <- 'columnName'
-  names(resultsDataModel)[names(resultsDataModel) == 'type'] <- 'dataType'
-  
   resultsDataModel <- resultsDataModel[file.exists(file.path(exportFolder, paste0(resultsDataModel$tableName, ".csv"))), ]
   newTableNames <- paste0(moduleInfo$TablePrefix, resultsDataModel$tableName)
   file.rename(file.path(exportFolder, paste0(unique(resultsDataModel$tableName), ".csv")),
