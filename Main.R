@@ -27,7 +27,7 @@ execute <- function(jobContext) {
     stop("Execution settings not found in job context")
   }
   
-  message("Generating cohort definition set")
+  message("Creating cohort definition set from job context")
   cohortDefinitionSet <- createCohortDefinitionSetFromJobContext(sharedResources = jobContext$sharedResources)
 
   message("Executing cohort diagnostics")
@@ -42,6 +42,7 @@ execute <- function(jobContext) {
   args$cohortTableNames <- jobContext$moduleExecutionSettings$cohortTableNames
   args$incrementalFolder <- jobContext$moduleExecutionSettings$workSubFolder
   args$minCellCount <- jobContext$moduleExecutionSettings$minCellCount
+  args$cohortIds <- jobContext$moduleExecutionSettings$cohortIds
   do.call(CohortDiagnostics::executeDiagnostics, args)
   
   unlink(file.path(exportFolder, sprintf("Results_%s.zip", jobContext$moduleExecutionSettings$databaseId)))
@@ -54,7 +55,9 @@ execute <- function(jobContext) {
   file.rename(file.path(exportFolder, paste0(unique(resultsDataModel$tableName), ".csv")),
               file.path(exportFolder, paste0(unique(newTableNames), ".csv")))
   resultsDataModel$tableName <- newTableNames
-  CohortGenerator::writeCsv(x = resultsDataModel, file.path(exportFolder, "resultsDataModelSpecification.csv"))
+  CohortGenerator::writeCsv(x = resultsDataModel, 
+                            file.path(exportFolder, "resultsDataModelSpecification.csv"),
+                            warnOnFileNameCaseMismatch = FALSE)
 }
 
 # Private methods -------------------------
