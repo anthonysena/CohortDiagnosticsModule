@@ -35,7 +35,7 @@ execute <- function(jobContext) {
   args <- jobContext$settings
   args$cohortDefinitionSet <- cohortDefinitionSet
   args$exportFolder <- exportFolder
-  args$databaseId <- jobContext$moduleExecutionSettings$databaseId
+  args$databaseId <- as.character(jobContext$moduleExecutionSettings$databaseId) # Force to character
   args$connectionDetails <- jobContext$moduleExecutionSettings$connectionDetails
   args$cdmDatabaseSchema <- jobContext$moduleExecutionSettings$cdmDatabaseSchema
   args$cohortDatabaseSchema <- jobContext$moduleExecutionSettings$workDatabaseSchema
